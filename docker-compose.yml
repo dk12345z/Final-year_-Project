@@ -1,0 +1,26 @@
+services:
+  api-dev:
+    profiles: ["dev"]
+    build: .
+    command: uvicorn app.api:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      MODEL_PATH: /models/best.pt
+      DEVICE: cpu
+    volumes:
+      - ./app:/service/app
+      - ./artifacts:/models:ro
+      - ./data:/data:ro
+
+  api-prod:
+    profiles: ["prod"]
+    build: .
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      MODEL_PATH: ${MODEL_PATH:-/models/best.pt}
+      DEVICE: ${DEVICE:-cpu}
+    volumes:
+      - ./models:/models:ro
+    restart: unless-stopped
